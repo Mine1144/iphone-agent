@@ -392,7 +392,9 @@ final class DeviceTools: @unchecked Sendable {
             }
         }
         let coords = String(format: "%.5f, %.5f", location.coordinate.latitude, location.coordinate.longitude)
-        return "ตำแหน่งปัจจุบัน: \(place?.locality ?? place?.administrativeArea ?? "ไม่ทราบพื้นที่), \(place?.country ?? "") พิกัด \(coords)"
+        let area = place?.locality ?? place?.administrativeArea ?? "ไม่ทราบพื้นที่"
+        let country = place?.country ?? ""
+        return "ตำแหน่งปัจจุบัน: \(area), \(country) พิกัด \(coords)"
     }
 
     // MARK: - รายชื่อผู้ติดต่อ
