@@ -34,6 +34,10 @@ jobs:
       - name: Sync Capacitor (www -> ios)
         run: npx cap sync ios
 
+      - name: Patch SPM tools-version (ต้อง 6.2 สำหรับ .iOS(.v26))
+        run: |
+          node -e "const fs=require('fs');const p='ios/App/CapApp-SPM/Package.swift';let s=fs.readFileSync(p,'utf8');s=s.replace('swift-tools-version: 5.9','swift-tools-version: 6.2');fs.writeFileSync(p,s);console.log(s.split('\n')[0]);"
+
       - name: Verify native plugin registered
         run: |
           grep -q "AgentPlugin" ios/App/App/capacitor.config.json || {

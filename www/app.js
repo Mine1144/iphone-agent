@@ -39,8 +39,8 @@
     native: false,
     plugin: null,
     brain: "cloud",          // cloud | ondevice
-    providerId: "openrouter",
-    model: "",
+    providerId: "pollinations", // เริ่มต้นด้วยตัวที่ไม่ต้องใช้คีย์ → ใช้ได้ทันที
+    model: "openai",
     onDeviceAvailable: false,
     onDeviceNote: "",
     tts: false,
@@ -190,6 +190,9 @@
     el.keyHint.textContent = p.keyRequired
       ? `ต้องใส่คีย์ — สมัครที่ ${p.keyURL} · ${p.note || ""}`
       : `ไม่ต้องใส่คีย์ · ${p.note || ""}`;
+    if (p.cors === false) {
+      el.keyHint.textContent += " · ⚠️ เบราว์เซอร์บล็อก CORS ของผู้ให้บริการนี้ (ใช้ได้ในแอป native เท่านั้น)";
+    }
     if (state.native && state.nativeHasKey && p.keyRequired) {
       el.keyHint.textContent = "มีคีย์บันทึกไว้ใน Keychain ของเครื่องแล้ว — พิมพ์ทับถ้าจะเปลี่ยน";
     }

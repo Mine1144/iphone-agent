@@ -10,6 +10,11 @@ workflows:
         script: npm ci
       - name: sync capacitor
         script: npx cap sync ios
+      - name: patch spm tools version
+        script: |
+          # cap sync generate Package.swift ด้วย tools-version 5.9 ซึ่งไม่รู้จัก .iOS(.v26)
+          # ต้องเป็น 6.2 (SwiftPM ใน Xcode 26)
+          node -e "const fs=require('fs');const p='ios/App/CapApp-SPM/Package.swift';let s=fs.readFileSync(p,'utf8');s=s.replace('swift-tools-version: 5.9','swift-tools-version: 6.2');fs.writeFileSync(p,s);console.log('patched:',s.split('\n')[0]);"
       - name: verify native plugin
         script: |
           grep -q "AgentPlugin" ios/App/App/capacitor.config.json || { echo "::error::AgentPlugin ไม่ได้ register"; exit 1; }

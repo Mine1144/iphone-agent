@@ -59,7 +59,7 @@ window.PROVIDERS = [
       { id: "glm-4.6", name: "GLM 4.6" },
     ] },
   { id: "kilo", name: "Kilo (ฟรี ไม่ต้องใช้คีย์)", baseURL: "https://api.kilo.ai/api/gateway", format: "openai",
-    keyRequired: false, keyURL: "-", note: "โมเดลฟรี ไม่ต้องมี API key",
+    keyRequired: false, keyURL: "-", note: "โมเดลฟรี ไม่ต้องมี API key", cors: false,
     models: [
       { id: "poolside/laguna-s-2.1:free", name: "Laguna S 2.1 (ฟรี)" },
       { id: "qwen/qwen3.8-27b:free", name: "Qwen3.8-27B (ฟรี)" },
@@ -83,7 +83,7 @@ window.PROVIDERS = [
       { id: "agnes-3-flash", name: "Agnes 3 Flash (ฟรี)" },
     ] },
   { id: "pollinations", name: "Pollinations (ฟรี ไม่ต้องใช้คีย์)", baseURL: "https://text.pollinations.ai/openai", format: "openai",
-    keyRequired: false, keyURL: "-", note: "ฟรี ไม่ต้องมีคีย์",
+    keyRequired: false, keyURL: "-", note: "ฟรี ไม่ต้องมีคีย์ — ใช้ได้ทันทีในโหมดเว็บ", cors: true,
     models: [ { id: "openai", name: "GPT-OSS 20B (ฟรี)" } ] },
   { id: "ollama", name: "Ollama (ในเครื่อง)", baseURL: "http://localhost:11434/v1", format: "openai",
     keyRequired: false, keyURL: "-", note: "ต้องเปิด Ollama ไว้บนคอม",
