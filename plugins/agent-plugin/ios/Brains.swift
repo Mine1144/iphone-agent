@@ -209,7 +209,7 @@ final class CloudBrain {
         for _ in 0..<8 {
             let reply = try await callAPI(toolsAllowed: turns.count < 12)
             if let calls = reply.toolCalls, !calls.isEmpty {
-                turns.append(.assistantToolCalls(calls))
+                turns.append(.assistantToolCalls(calls.map { (id: $0.id, name: $0.name, input: $0.arguments) }))
                 for call in calls {
                     events.emit("tool", [
                         "name": call.name,
@@ -332,18 +332,21 @@ final class CloudBrain {
         for turn in turns {
             switch turn {
             case .user(let t):
-                messages.append(["role": "user", "content": [[type: "text", text: t]]])
+                let userContent: [[String: Any]] = [["type": "text", "text": t]]
+                messages.append(["role": "user", "content": userContent])
             case .assistantText(let t):
-                messages.append(["role": "assistant", "content": [[type: "text", text: t]]])
+                let textContent: [[String: Any]] = [["type": "text", "text": t]]
+                messages.append(["role": "assistant", "content": textContent])
             case .assistantToolCalls(let calls):
                 let blocks: [[String: Any]] = calls.map { c in
                     ["type": "tool_use", "id": c.id, "name": c.name, "input": c.input]
                 }
                 messages.append(["role": "assistant", "content": blocks])
             case .toolResult(let id, _, let content):
+                let resultContent: [[String: Any]] = [["type": "tool_result", "tool_use_id": id, "content": content]]
                 messages.append([
                     "role": "user",
-                    "content": [["type": "tool_result", "tool_use_id": id, "content": content]],
+                    "content": resultContent,
                 ])
             }
         }

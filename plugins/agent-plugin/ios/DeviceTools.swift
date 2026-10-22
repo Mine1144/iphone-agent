@@ -8,7 +8,6 @@ import Photos
 import Vision
 import MediaPlayer
 import Network
-import SystemConfiguration
 
 /// ขออนุมัติจากผู้ใช้ก่อนทำ action ที่เสี่ยง
 protocol ApprovalGate: AnyObject {
@@ -277,7 +276,7 @@ final class DeviceTools: @unchecked Sendable {
         guard granted else { return "ผู้ใช้ไม่ได้อนุญาตให้เข้าถึง Reminders" }
         let reminder = EKReminder(eventStore: store)
         reminder.title = title
-        reminder.calendar = store.defaultCalendarForNewReminders()
+        reminder.calendar = store.calendars(for: .reminder).first { $0.allowsContentModifications }
         if let extra, let at = Self.parseExtra(extra)["at"], let date = Self.parseDate(at) {
             reminder.addAlarm(EKAlarm(absoluteDate: date))
         }
@@ -296,13 +295,16 @@ final class DeviceTools: @unchecked Sendable {
         let cal = Calendar.current
         let start = cal.startOfDay(for: Date())
         let end = cal.date(byAdding: .day, value: 1, to: start)!
-        let pred = store.predicateForReminders(in: [EKReminder.self], startDate: start, endDate: end)
+        let reminderCalendars = store.calendars(for: .reminder)
+        let pred = store.predicateForReminders(in: reminderCalendars)
         var titles: [String] = []
         let sem = DispatchSemaphore(value: 0)
         store.fetchReminders(matching: pred) { reminders in
             for r in reminders ?? [] {
-                let due = r.dueDateComponents?.date.map { Self.fmt($0) } ?? "ไม่กำหนดเวลา"
-                titles.append("• \(r.title ?? "(ไม่มีชื่อ)") — \(due)")
+                // กรองเฉพาะที่ครบกำหนดภายในวันนี้
+                if let due = r.dueDateComponents?.date, due < end, due >= start {
+                    titles.append("• \(r.title ?? "(ไม่มีชื่อ)") — \(Self.fmt(due))")
+                }
             }
             sem.signal()
         }
@@ -353,7 +355,7 @@ final class DeviceTools: @unchecked Sendable {
         event.title = title
         event.startDate = start
         event.endDate = start.addingTimeInterval(duration * 60)
-        event.calendar = store.defaultCalendarForNewEvents()
+        event.calendar = store.calendars(for: .event).first { $0.allowsContentModifications }
         if let notes = params["notes"] { event.notes = notes }
         do {
             try store.save(event, commit: true)
@@ -597,11 +599,9 @@ final class DeviceTools: @unchecked Sendable {
         }
         _ = sem.wait(timeout: .now() + 5)
         monitor.stop()
-        var ssid = "อ่านชื่อ Wi-Fi ไม่ได้ (ต้องมีสิทธิ์ Access Wi-Fi Information ซึ่งแอปที่ติดตั้งเองจะไม่ได้)"
-        if let info = CNCopyCurrentNetworkInfo() as? [String: Any],
-           let name = info["SSID"] as? String, !name.isEmpty {
-            ssid = name
-        }
+        // อ่านชื่อ SSID ไม่ได้ถ้าแอปไม่มี entitlement "Access Wi-Fi Information"
+        // (แอปที่ติดตั้งเองด้วย LiveContainer/SideStore จะไม่มี) — จึงไม่เรียก API ที่ต้องมี entitlement
+        let ssid = "อ่านชื่อ Wi-Fi ไม่ได้ (ต้องมีสิทธิ์ Access Wi-Fi Information ซึ่งแอปที่ติดตั้งเองจะไม่ได้)"
         return "ประเภทเครือข่าย: \(kind)\nชื่อ Wi-Fi: \(ssid)"
     }
 

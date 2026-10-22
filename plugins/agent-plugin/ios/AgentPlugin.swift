@@ -26,7 +26,7 @@ final class ApprovalCoordinator: ApprovalGate, @unchecked Sendable {
             handler?(id, tool, summary)
             // กันค้างถ้าผู้ใช้ไม่ตอบ — 60 วินาทีแล้วถือว่าไม่อนุมัติ
             DispatchQueue.main.asyncAfter(deadline: .now() + 60) { [weak self] in
-                self?.resolve(id, false)
+                self?.resolve(id, approved: false)
             }
         }
     }
@@ -36,8 +36,7 @@ final class ApprovalCoordinator: ApprovalGate, @unchecked Sendable {
         let cont = pending.removeValue(forKey: id)
         lock.unlock()
         cont?.resume(returning: approved)
-    }
-}
+    }}
 
 /// คีย์ API เก็บใน Keychain (ไม่เก็บใน UserDefaults)
 enum KeychainStore {
