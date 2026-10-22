@@ -128,6 +128,20 @@
     requestAnimationFrame(() => { el.chat.scrollTop = el.chat.scrollHeight; });
   }
 
+  /** แถบแจ้งเตือนด้านบน (ใช้ตอน plugin ไม่โหลด หรือมี error) */
+  function banner(text, tone) {
+    let b = document.getElementById('banner');
+    if (!b) {
+      b = document.createElement('div');
+      b.id = 'banner';
+      b.className = 'banner';
+      document.getElementById('app').prepend(b);
+    }
+    b.textContent = text;
+    b.dataset.tone = tone || 'warn';
+    b.hidden = false;
+  }
+
   function setStatus(text, tone) {
     el.statusText.textContent = text;
     el.orb.dataset.tone = tone || "idle";
@@ -393,8 +407,11 @@
 
     try {
       if (state.native) {
-        // ผลลัพธ์มาจาก event ของ plugin
-        const res = await state.plugin.send({ text: t });
+        // ผลลัพธ์มาจาก event ของ plugin (มี timeout กันค้าง)
+        const res = await Promise.race([
+          state.plugin.send({ text: t }),
+          new Promise((_, rej) => setTimeout(() => rej(new Error("สมองไม่ตอบใน 2 นาที — ลองเปลี่ยนผู้ให้บริการหรือโมเดล")), 120000)),
+        ]);
         removeTyping();
         if (res && res.text) addBubble("agent", res.text);
         speakOut(res && res.text);
@@ -602,7 +619,6 @@
       state.native = true;
       state.plugin = cap.Plugins.AgentPlugin;
       bindNativeEvents();
-
       try {
         const tl = await state.plugin.listTools();
         state.tools = tl.tools || [];
@@ -633,8 +649,12 @@
         ? "โหมดแอป: ใช้เครื่องมือคุม iPhone ได้ครบ — " + state.onDeviceNote
         : "โหมดแอป: " + (state.onDeviceNote || "เครื่องนี้ใช้เฉพาะโมเดลคลาวด์");
     } else {
-      el.modeHint.textContent = "โหมดเว็บ (PWA): เรียก API ตรงจากมือถือ — เครื่องมือคุมเครื่องจะใช้ได้เต็มเมื่อติดตั้งเป็นแอป";
+      const hasCapacitor = !!(cap && cap.Plugins);
+      el.modeHint.textContent = hasCapacitor
+        ? "⚠️ เปิดเป็นแอป แต่ native plugin ไม่ได้โหลด — กำลังใช้โหมดเว็บ (เครื่องมือคุมเครื่องจะใช้ไม่ได้)"
+        : "โหมดเว็บ (PWA): เรียก API ตรงจากมือถือ — เครื่องมือคุมเครื่องจะใช้ได้เต็มเมื่อติดตั้งเป็นแอป";
       el.cfgOnDevice.disabled = true;
+      if (hasCapacitor) banner("native plugin ไม่ได้โหลด — ใช้โหมดเว็บชั่วคราว", "err");
     }
 
     el.cfgOnDevice.checked = state.brain === "ondevice";

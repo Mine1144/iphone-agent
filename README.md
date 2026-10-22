@@ -79,21 +79,28 @@ npx http-server www -p 5173 -c-1
 
 ### 4.2 แบบแอป native — ได้เครื่องมือครบ
 
-**ทางลัด (สคริปต์เตรียมไว้ให้):** ตั้ง `$env:GITHUB_TOKEN = "ghp_xxx"` (PAT สิทธิ์ repo) แล้วรัน
-`.\build-ipa.ps1 -Repo "owner/iphone-agent" -Create`
-→ สคริปต์จะสร้าง repo, commit & push, สั่ง workflow, รอจนเสร็จ แล้วดาวน์โหลด `iPhoneAgent-unsigned.ipa` มาไว้ในโฟลเดอร์นี้ให้อัตโนมัติ
-(ต้องมี Git for Windows — `winget install --id Git.Git -e`)
+**✅ ไฟล์ .ipa พร้อมแล้ว** → `iphone-agent/dist/iPhoneAgent-unsigned.ipa` (782 KB, arm64, minOS 26.0)
 
-**ทางแมนวล (เหมือนที่เคยทำกับ ipa-studio):** รัน `.\build-ipa.ps1 -Manual` เพื่อดูขั้นตอน
+ติดตั้ง:
+1. **LiveContainer** → Settings → Import Certificate from AltStore/SideStore → เลือกไฟล์ `.ipa` → กด **+** เพื่อเพิ่มแอป
+2. **SideStore/AltStore** → กด + → เลือกไฟล์ `.ipa` → รอ re-sign
+3. เปิดแอป **iPhoneAgent** → ⚙︎ → เลือกผู้ให้บริการ AI (เช่น Pollinations = ไม่ต้องใช้คีย์) → คุยได้เลย
 
-1. push โฟลเดอร์ `iphone-agent` ขึ้น GitHub (branch `main`)
-2. tab **Actions** → **Build IPA (iPhone Agent)** → **Run workflow**
-3. ดาวน์โหดด artifact `ios-ipa` → ได้ `iPhoneAgent-unsigned.ipa`
-4. ติดตั้งผ่าน **LiveContainer / SideStore / AltStore**
-   (LiveContainer: Settings → Import Certificate → เลือก .ipa → เปิดแอป)
-5. เปิดแอป → ไปแท็บตั้งค่า → เลือกผู้ให้บริการ → ใส่ API key
+**สร้าง .ipa ใหม่เอง (คำสั่งเดียว):**
 
-> runner คือ `macos-26` (Xcode 26) — โปรเจกต์ตั้ง deployment target เป็น **iOS 26.0**
+```powershell
+cd "C:\Users\natee\OneDrive\เอกสาร\Default Project"
+powershell -ExecutionPolicy Bypass -File tools\push-build.ps1 iphone-agent
+```
+
+→ commit & push → สั่ง build ที่ Codemagic (macOS runner) → รอ → ดาวน์โหลด `.ipa` กลับมาไว้ใน `iphone-agent/dist/`
+(ต้องมี `tools\.gh-token` และ `tools\.codemagic-key` — เก็บ token ไว้ในเครื่อง ไม่ได้อยู่ใน repo)
+
+**ถ้าอยากใช้ GitHub Actions แทน** (workflow พร้อมแล้วใน `.github/workflows/`):
+ต้องแก้บัญชีก่อน — Settings → Billing and licensing → Budgets and alerts → ลบ/เพิ่ม budget ของ **Actions**
+ที่เป็น `$0.00 · 100% Usage blocked` (GitHub ต้องการ payment method จึงจะแก้ได้) แล้ว build ได้ผ่าน `build-ios-ipa.yml`
+
+> runner คือ macos-26 (Xcode 26) — โปรเจกต์ตั้ง deployment target เป็น **iOS 26.0**
 
 ### 4.3 ถ้ามี Mac
 
