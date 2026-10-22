@@ -180,7 +180,21 @@ iphone-agent/
 
 ---
 
-## 8. ทดสอบ
+## 8. แก้ปัญหาที่พบบ่อย
+
+| อาการ | สาเหตุ | แก้ |
+|---|---|---|
+| **กดปุ่มไม่ได้เลย** | CSS `.sheet`/`.approval-host` เป็น `display:flex` ทับเต็มจอ (attribute `hidden` แพ้) | เพิ่ม `[hidden]{display:none !important}` ใน `style.css` (แก้แล้ว) |
+| เลื่อนแชทไม่ได้ | `capacitor.config.json` มี `scrollEnabled: false` | ตัดออก (แก้แล้ว) |
+| แอปเปิดแล้วทำอะไรไม่ได้ | ยังไม่ได้ re-sign ให้เครื่อง | LiveContainer: Settings → Import Certificate from AltStore/SideStore |
+| ขึ้นแถบแดง "native plugin ไม่ได้โหลด" | plugin ไม่ register ใน `packageClassList` | ตรวจ `ios/App/App/capacitor.config.json` ต้องมี `"AgentPlugin"` |
+| กดส่งแล้วไม่มีคำตอบ | ผู้ให้บริการ/โมเดลไม่ตอบ | ⚙︎ → สถานะระบบ → เปลี่ยนผู้ให้บริการ (ลอง Pollinations ที่ไม่ต้องใช้คีย์) |
+| สมองบนเครื่องใช้ไม่ได้ | ต้อง iOS 26 + iPhone 15 Pro ขึ้นไป | ใช้โมเดลคลาวด์แทน |
+| ค้างที่ "กำลังคิด…" | สมองค้าง | มี timeout 2 นาที + fallback ไปโหมดเว็บอัตโนมัติ |
+
+> **ดูสถานะระบบในแอป:** ⚙︎ → สถานะระบบ → จะเห็นโหมด, plugin, จำนวนเครื่องมือ, iOS เวอร์ชัน, สมองบนเครื่องใช้ได้ไหม
+
+## 9. ทดสอบ
 
 ```powershell
 node tmp\mock-agent-server.mjs     # เสิร์ฟ www/ + API จำลอง (ตอบแบบมี tool call)
