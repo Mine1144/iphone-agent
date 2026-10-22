@@ -358,7 +358,7 @@ final class DeviceTools: @unchecked Sendable {
         event.calendar = store.calendars(for: .event).first { $0.allowsContentModifications }
         if let notes = params["notes"] { event.notes = notes }
         do {
-            try store.save(event, commit: true)
+            try store.save(event, span: .thisEvent, commit: true)
             return "เพิ่มนัดหมาย “\(title)” เรีย่อวันที่ \(Self.fmt(start)) ยาว \(Int(duration)) นาที แล้ว"
         } catch {
             return "เพิ่มนัดหมายไม่สำเร็จ: \(error.localizedDescription)"

@@ -266,7 +266,7 @@ public class AgentPlugin: CAPPlugin, CAPBridgedPlugin, BrainEvents {
     @objc func approve(_ call: CAPPluginCall) {
         let id = call.getString("id") ?? ""
         let approved = call.getBool("approved") ?? false
-        gate.resolve(id, approved)
+        gate.resolve(id, approved: approved)
         call.resolve(["ok": true])
     }
 
