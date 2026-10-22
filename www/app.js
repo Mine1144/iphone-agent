@@ -28,6 +28,7 @@
     cfgSimple: $("#cfgSimple"),
     btnClear: $("#btnClear"),
     modeHint: $("#modeHint"),
+    sysInfo: $("#sysInfo"),
     approvalHost: $("#approvalHost"),
     approvalTitle: $("#approvalTitle"),
     approvalSummary: $("#approvalSummary"),
@@ -171,6 +172,30 @@
     hideApproval();
     if (state.native) await state.plugin.approve({ id: p.id, approved: false });
   });
+
+  /** ข้อมูลสถานะระบบ (แสดงในหน้าตั้งค่า เพื่อให้ผู้ใช้ตรวจได้เอง) */
+  async function refreshSysInfo() {
+    if (!el.sysInfo) return;
+    const rows = [];
+    rows.push("โหมด: " + (state.native ? "แอป native (มี plugin)" : "เว็บ (โหมดสำรอง)"));
+    rows.push("ผู้ให้บริการ: " + providerById(state.providerId).name + " · " + state.model);
+    rows.push("สมอง: " + (state.brain === "ondevice" ? "บนเครื่อง (Foundation Models)" : "คลาวด์"));
+    rows.push("เครื่องมือที่ลงทะเบียน: " + (state.tools.length || 0) + " ตัว");
+    if (state.native) {
+      try {
+        const av = await state.plugin.availability();
+        rows.push("iOS: " + (av.ios || "?") + " · เครื่อง: " + (av.device || "?"));
+        rows.push("สมองบนเครื่อง: " + (av.onDevice && av.onDevice.available ? "ใช้ได้" : "ใช้ไม่ได้ — " + ((av.onDevice && av.onDevice.note) || "")));
+        const tl = await state.plugin.listTools();
+        rows.push("เครื่องมือจาก native: " + ((tl.tools || []).length) + " ตัว");
+      } catch (e) {
+        rows.push("native error: " + (e && (e.message || e)));
+      }
+    } else {
+      rows.push("เครื่องมือเว็บ: " + (window.WEB_TOOLS || []).length + " ตัว");
+    }
+    el.sysInfo.textContent = rows.join("\n");
+  }
 
   // ---------------------------------------------------------------- ตั้งค่า UI
 
@@ -408,13 +433,28 @@
     try {
       if (state.native) {
         // ผลลัพธ์มาจาก event ของ plugin (มี timeout กันค้าง)
-        const res = await Promise.race([
-          state.plugin.send({ text: t }),
-          new Promise((_, rej) => setTimeout(() => rej(new Error("สมองไม่ตอบใน 2 นาที — ลองเปลี่ยนผู้ให้บริการหรือโมเดล")), 120000)),
-        ]);
-        removeTyping();
-        if (res && res.text) addBubble("agent", res.text);
-        speakOut(res && res.text);
+        try {
+          const res = await Promise.race([
+            state.plugin.send({ text: t }),
+            new Promise((_, rej) => setTimeout(() => rej(new Error("สมองไม่ตอบใน 2 นาที — ลองเปลี่ยนผู้ให้บริการหรือโมเดล")), 120000)),
+          ]);
+          removeTyping();
+          if (res && res.text) addBubble("agent", res.text);
+          speakOut(res && res.text);
+        } catch (err) {
+          // plugin ใช้ไม่ได้ → ถอยไปใช้โหมดเว็บแทน (ยังคุยได้)
+          removeTyping();
+          const msg = String(err && (err.message || err));
+          if (/not implemented|unavailable|plugin/i.test(msg)) {
+            state.native = false;
+            banner("native plugin ใช้ไม่ได้ (" + msg.slice(0, 60) + ") — ถอยไปโหมดเว็บ", "err");
+            const out = await webChat(t);
+            addBubble("agent", out);
+            speakOut(out);
+          } else {
+            addBubble("agent", "⚠️ " + msg);
+          }
+        }
       } else {
         const out = await webChat(t);
         removeTyping();
@@ -536,9 +576,10 @@
 
   el.brainBtn.addEventListener("click", () => {
     el.settings.hidden = false;
+    refreshSysInfo();
   });
 
-  el.settingsBtn.addEventListener("click", () => { el.settings.hidden = false; });
+  el.settingsBtn.addEventListener("click", () => { el.settings.hidden = false; refreshSysInfo(); });
   el.settingsClose.addEventListener("click", () => { el.settings.hidden = true; });
   el.settings.addEventListener("click", (e) => { if (e.target === el.settings) el.settings.hidden = true; });
 
