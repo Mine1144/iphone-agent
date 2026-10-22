@@ -1,0 +1,14 @@
+{
+  "name": "ผู้ช่วย iPhone — AI Agent",
+  "short_name": "ผู้ช่วย iPhone",
+  "description": "AI Agent ที่ควบคุม iPhone ได้จริง — สมองบนเครื่องหรือ OpenRouter/OpenAI/Groq/NVIDIA",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "lang": "th",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

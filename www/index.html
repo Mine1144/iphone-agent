@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ผู้ช่วย iPhone">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0d12">
+<title>ผู้ช่วย iPhone — AI Agent</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="orb" id="orb"></div>
+      <div class="brand-text">
+        <strong>ผู้ช่วย iPhone</strong>
+        <span id="statusText">กำลังเชื่อมต่อ…</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="brainBtn" class="pill" type="button">สมอง: —</button>
+      <button id="settingsBtn" class="icon-btn" type="button" aria-label="ตั้งค่า">⚙︎</button>
+    </div>
+  </header>
+
+  <main id="chat" class="chat"></main>
+
+  <div id="composer" class="composer">
+    <button id="micBtn" class="round-btn" type="button" aria-label="พูด">🎙️</button>
+    <button id="attachBtn" class="round-btn" type="button" aria-label="แนบรูป">📷</button>
+    <input id="input" type="text" autocomplete="off" enterkeyhint="send" placeholder="สั่งงานเครื่องของคุณ…">
+    <button id="sendBtn" class="round-btn primary" type="button" aria-label="ส่ง">➤</button>
+  </div>
+
+  <input id="fileInput" type="file" accept="image/*" hidden>
+</div>
+
+<!-- แผงขออนุมัติ -->
+<div id="approvalHost" class="approval-host" hidden>
+  <div class="approval-card">
+    <div class="approval-head">
+      <span class="approval-icon">⚠️</span>
+      <div>
+        <strong id="approvalTitle">ขออนุมัติ</strong>
+        <p id="approvalSummary"></p>
+      </div>
+    </div>
+    <div class="approval-actions">
+      <button id="approvalDeny" class="btn ghost" type="button">ปฏิเสธ</button>
+      <button id="approvalAllow" class="btn primary" type="button">อนุมัติ</button>
+    </div>
+  </div>
+</div>
+
+<!-- แผงตั้งค่า -->
+<div id="settings" class="sheet" hidden>
+  <div class="sheet-inner">
+    <div class="sheet-head">
+      <h2>ตั้งค่า</h2>
+      <button id="settingsClose" class="icon-btn" type="button">✕</button>
+    </div>
+
+    <label class="field">
+      <span>สมอง (ผู้ให้บริการ AI)</span>
+      <select id="cfgProvider"></select>
+    </label>
+
+    <label class="field">
+      <span>โมเดล</span>
+      <select id="cfgModel"></select>
+      <input id="cfgModelCustom" type="text" placeholder="หรือพิมพ์ชื่อโมเดลเอง" hidden>
+    </label>
+
+    <label class="field" id="baseUrlField" hidden>
+      <span>Base URL (OpenAI-compatible)</span>
+      <input id="cfgBaseUrl" type="text" placeholder="http://127.0.0.1:4000">
+    </label>
+
+    <label class="field">
+      <span>API key (เก็บใน Keychain ของเครื่อง)</span>
+      <input id="cfgApiKey" type="password" placeholder="sk-..." autocomplete="off">
+      <small id="keyHint" class="hint"></small>
+    </label>
+
+    <label class="switch">
+      <span>สมองบนเครื่อง (Apple Foundation Models) — ใช้ออฟไลน์ ไม่ส่งข้อมูลออก</span>
+      <input id="cfgOnDevice" type="checkbox">
+    </label>
+
+    <label class="switch">
+      <span>อ่านคำตอบออกเสียง (TTS)</span>
+      <input id="cfgTTS" type="checkbox">
+    </label>
+
+    <label class="switch">
+      <span>โหมดเรียบง่าย (ไม่แสดงรายละเอียดเครื่องมือ)</span>
+      <input id="cfgSimple" type="checkbox">
+    </label>
+
+    <button id="btnClear" class="btn ghost wide" type="button">ล้างประวัติสนทนา</button>
+    <p class="hint" id="modeHint"></p>
+  </div>
+</div>
+
+<script src="providers.js"></script>
+<script src="tools.web.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

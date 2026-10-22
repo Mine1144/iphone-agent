@@ -1,0 +1,24 @@
+{
+  "name": "iphone-agent",
+  "version": "1.0.0",
+  "description": "AI Agent ที่รันบน iPhone — สมองบนเครื่อง (Foundation Models) + เครื่องมือควบคุม iPhone",
+  "license": "MIT",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "sync": "cap sync ios",
+    "copy": "cap copy ios",
+    "open:ios": "cap open ios",
+    "serve": "npx --yes http-server www -p 5173 -c-1"
+  },
+  "keywords": [],
+  "author": "",
+  "dependencies": {
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.3",
+    "agent-plugin": "file:plugins/agent-plugin"
+  }
+}

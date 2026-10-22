@@ -1,0 +1,19 @@
+{
+  "name": "agent-plugin",
+  "version": "1.0.0",
+  "description": "Native iOS plugin: on-device AI brain (Foundation Models) + device-control tools (Shortcuts, EventKit, CoreLocation, Photos, AVFoundation...)",
+  "license": "MIT",
+  "main": "index.js",
+  "capacitor": {
+    "ios": {
+      "src": "ios"
+    }
+  },
+  "keywords": [
+    "capacitor",
+    "plugin",
+    "native",
+    "ai",
+    "foundation-models"
+  ]
+}
